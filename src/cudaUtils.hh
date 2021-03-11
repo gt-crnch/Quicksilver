@@ -21,7 +21,7 @@ extern sycl::queue sycl_device_queue; // global variable for device queue
 
 // printf
 //namespace syclx = sycl::ONEAPI::experimental; // latest OSS DPC++
-namespace syclx = sycl::intel::experimental;    // dpcpp beta09
+namespace syclx = sycl::ONEAPI::experimental;    // dpcpp beta09
 
 #else // not SYCL
 
