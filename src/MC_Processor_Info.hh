@@ -10,13 +10,16 @@ public:
     int rank;
     int num_processors;
     int use_gpu;
+    int use_fpga;
     int gpu_id;
+    // int fpga_id; //may not need
 
     MPI_Comm  comm_mc_world;
 
     MC_Processor_Info()
     : comm_mc_world(MPI_COMM_WORLD),
       use_gpu(0),
+      use_fpga(0),
       gpu_id(0)
     {
       mpiComm_rank(comm_mc_world, &rank);

@@ -10,6 +10,7 @@
 #if defined(HAVE_SYCL)
 
 #include <CL/sycl.hpp>
+#include <CL/sycl/INTEL/fpga_device_selector.hpp>
 
 extern sycl::queue sycl_device_queue; // global variable for device queue
 
@@ -46,9 +47,9 @@ namespace syclx = sycl::ONEAPI::experimental;    // dpcpp beta09
     #define VAR_MEM MemoryControl::AllocationPolicy::HOST_MEM
 #endif
 
-enum ExecutionPolicy{ cpu, gpuWithCUDA, gpuWithOpenMP, SYCL };
+enum ExecutionPolicy{ cpu, gpuWithCUDA, gpuWithOpenMP, SYCL, SYCL_fpga };
 
-inline ExecutionPolicy getExecutionPolicy( int useGPU )
+inline ExecutionPolicy getExecutionPolicy( int useGPU, int useFPGA )
 {
     ExecutionPolicy execPolicy = ExecutionPolicy::cpu;
 
@@ -60,6 +61,13 @@ inline ExecutionPolicy getExecutionPolicy( int useGPU )
         execPolicy = ExecutionPolicy::gpuWithOpenMP;
         #elif defined (HAVE_SYCL)
         execPolicy = ExecutionPolicy::SYCL;
+        #endif
+    }
+    else
+    if( useFPGA )
+    {
+        #if defined (HAVE_SYCL)
+        execPolicy = ExecutionPolicy::SYCL_fpga;
         #endif
     }
     return execPolicy;

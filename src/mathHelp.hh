@@ -3,6 +3,7 @@
 
 #ifdef HAVE_SYCL
 #include <CL/sycl.hpp>
+#include <CL/sycl/INTEL/fpga_device_selector.hpp>
 #define SIN  sycl::sin
 #define COS  sycl::cos
 #define SQRT sycl::sqrt

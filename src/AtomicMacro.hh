@@ -15,6 +15,7 @@
 
 #ifdef HAVE_SYCL
 #include <CL/sycl.hpp>
+#include <CL/sycl/INTEL/fpga_device_selector.hpp>
 #include <cstdint>
 #endif
 

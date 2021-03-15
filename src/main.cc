@@ -63,8 +63,12 @@ int main(int argc, char** argv)
        sycl_device_queue = cl::sycl::host_selector{};
    }
    else
+   if (devname == "FPGA") {
+       sycl_device_queue = cl::sycl::INTEL::fpga_selector{};
+   }
+   else
    {
-       std::cout << "QS_DEVICE must be CPU, GPU or HOST" << std::endl;
+       std::cout << "QS_DEVICE must be CPU, GPU, FPGA or HOST" << std::endl;
        std::abort();
    }
 
@@ -72,11 +76,12 @@ int main(int argc, char** argv)
    if ( sycl_device_queue.get_device().is_cpu() )         std::cout << "is cpu"         << std::endl;
    if ( sycl_device_queue.get_device().is_gpu() )         std::cout << "is gpu"         << std::endl;
    if ( sycl_device_queue.get_device().is_host() )        std::cout << "is host"        << std::endl;
-   if ( sycl_device_queue.get_device().is_accelerator() ) std::cout << "is accelerator" << std::endl;
+   if ( sycl_device_queue.get_device().is_accelerator() ) std::cout << "is accelerator" << std::endl; //returns true for FPGA
+   
 #endif
 
    // mcco stores just about everything.
-   mcco = initMC(params);
+   mcco = initMC(params); //should be okay for now
 
 #ifdef HAVE_SYCL // DEBUG - REMOVE LATER
     if (mcco->processor_info->use_gpu) {
@@ -187,7 +192,7 @@ void cycleTracking(MonteCarlo *monteCarlo)
     bool done = false;
 
     //Determine whether or not to use GPUs if they are available (set for each MPI rank)
-    ExecutionPolicy execPolicy = getExecutionPolicy( monteCarlo->processor_info->use_gpu );
+    ExecutionPolicy execPolicy = getExecutionPolicy( monteCarlo->processor_info->use_gpu, monteCarlo->processor_info->use_fpga);
 
     ParticleVaultContainer &my_particle_vault = *(monteCarlo->_particleVaultContainer);
 
@@ -283,6 +288,22 @@ void cycleTracking(MonteCarlo *monteCarlo)
                       #endif
                        }
                        break;
+
+                      case SYCL_fpga:
+                        {
+                        const size_t N = numParticles;
+                        #ifdef HAVE_SYCL
+                          sycl_device_queue.submit([&](sycl::handler &h) {
+                              h.single_task([=]() {
+                                 int particle_index = 0; //start from 0 i suppose
+                                 CycleTrackingGuts( monteCarlo, particle_index, processingVault, processedVault );
+                              });
+                          });
+                          sycl_device_queue.wait();
+                        #endif
+                        }
+
+                        break;
 
                       case cpu:
                        #include "mc_omp_parallel_for_schedule_static.hh"
