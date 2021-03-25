@@ -38,7 +38,8 @@
 static const cl::sycl::memory_order          order = cl::sycl::memory_order::relaxed;
 static const cl::sycl::access::address_space space = cl::sycl::access::address_space::global_space;
 
-template <typename T>
+
+/* template <typename T>
 inline void ATOMIC_WRITE(T & x, T v) {
     //x = v;
 }
@@ -56,23 +57,68 @@ inline void ATOMIC_ADD(T& x, T v) {
     //atomicAdd( &x, v );
     cl::sycl::atomic<T, space> y( (cl::sycl::multi_ptr<T, space>(&x)));
     cl::sycl::atomic_fetch_add(y, v, order);
-    // *x = (*x) + v;
+    
+}*/
+
+
+template <typename T>
+inline void ATOMIC_WRITE(T & x, T v) {
+    //x = v;
+}
+//note: is the above actually used?
+
+template <typename T>
+inline void ATOMIC_INCREMENT(T& x) {
+    //atomicAdd( &x, 1 );
+    // T one{1};
+    // cl::sycl::atomic<T, space> y( (cl::sycl::multi_ptr<T, space>(&x)));
+    // cl::sycl::atomic_fetch_add(y, one, order);
+    x = (x) + 1;
+}
+
+template <typename T>
+inline void ATOMIC_ADD(T& x, T v) {
+    //atomicAdd( &x, v );
+    // cl::sycl::atomic<T, space> y( (cl::sycl::multi_ptr<T, space>(&x)));
+    // cl::sycl::atomic_fetch_add(y, v, order);
+    x = (x) + v;
     
 }
 
+/*
 template <>
 inline void ATOMIC_ADD(double& x, double v) {
     static_assert(sizeof(double) == sizeof(uint64_t), "Unsafe: double is not 64-bits");
-    //atomicAdd( &x, v );
     cl::sycl::atomic<uint64_t, space> t( (cl::sycl::multi_ptr<uint64_t, space>( reinterpret_cast<uint64_t*>(&x)) ));
     uint64_t old_i = t.load(order);
-    // uint64_t old_i = *(reinterpret_cast<uint64_t*>(&x));
     double   old_d;
     do {
       old_d = *reinterpret_cast<const double*>(&old_i);
       const double   new_d = old_d + v;
       const uint64_t new_i = *reinterpret_cast<const uint64_t *>(&new_d);
       if (t.compare_exchange_strong(old_i, new_i, order)) break;
+        
+    } while (true);
+    // p = old_d;
+} */
+
+template <>
+inline void ATOMIC_ADD(double& x, double v) {
+    static_assert(sizeof(double) == sizeof(uint64_t), "Unsafe: double is not 64-bits");
+    //atomicAdd( &x, v );
+    // cl::sycl::atomic<uint64_t, space> t( (cl::sycl::multi_ptr<uint64_t, space>( reinterpret_cast<uint64_t*>(&x)) ));
+    // uint64_t old_i = t.load(order);
+    uint64_t old_i = *(reinterpret_cast<uint64_t*>(&x));
+    double   old_d;
+    do {
+      old_d = *reinterpret_cast<const double*>(&old_i);
+      const double   new_d = old_d + v;
+      const uint64_t new_i = *reinterpret_cast<const uint64_t *>(&new_d);
+    //   if t.compare_exchange_strong(old_i, new_i, order) break;
+      if (*reinterpret_cast<const uint64_t *>(&x) == old_i) {
+          *reinterpret_cast<uint64_t *>(&x) = new_i;  //removed const to make it writeable
+          break;
+      }
         
     } while (true);
     // p = old_d;
