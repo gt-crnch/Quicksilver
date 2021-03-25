@@ -56,6 +56,8 @@ inline void ATOMIC_ADD(T& x, T v) {
     //atomicAdd( &x, v );
     cl::sycl::atomic<T, space> y( (cl::sycl::multi_ptr<T, space>(&x)));
     cl::sycl::atomic_fetch_add(y, v, order);
+    // *x = (*x) + v;
+    
 }
 
 template <>
@@ -64,12 +66,14 @@ inline void ATOMIC_ADD(double& x, double v) {
     //atomicAdd( &x, v );
     cl::sycl::atomic<uint64_t, space> t( (cl::sycl::multi_ptr<uint64_t, space>( reinterpret_cast<uint64_t*>(&x)) ));
     uint64_t old_i = t.load(order);
+    // uint64_t old_i = *(reinterpret_cast<uint64_t*>(&x));
     double   old_d;
     do {
       old_d = *reinterpret_cast<const double*>(&old_i);
       const double   new_d = old_d + v;
       const uint64_t new_i = *reinterpret_cast<const uint64_t *>(&new_d);
       if (t.compare_exchange_strong(old_i, new_i, order)) break;
+        
     } while (true);
     // p = old_d;
 }

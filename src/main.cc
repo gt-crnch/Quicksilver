@@ -64,7 +64,7 @@ int main(int argc, char** argv)
    }
    else
    if (devname == "FPGA") {
-       sycl_device_queue = cl::sycl::INTEL::fpga_selector{};
+       sycl_device_queue = cl::sycl::INTEL::fpga_emulator_selector{};
    }
    else
    {
@@ -81,6 +81,7 @@ int main(int argc, char** argv)
 #endif
 
    // mcco stores just about everything.
+   
    mcco = initMC(params); //should be okay for now
 
 #ifdef HAVE_SYCL // DEBUG - REMOVE LATER

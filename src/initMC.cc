@@ -60,6 +60,7 @@ MonteCarlo* initMC(const Parameters& params)
       cudaMallocManaged( &ptr, sizeof(MonteCarlo), cudaMemAttachGlobal );
 #endif
       monteCarlo = new(ptr) MonteCarlo(params);
+      
    #else
      monteCarlo = new MonteCarlo(params);
    #endif
