@@ -33,13 +33,13 @@
 #define ATOMIC_CAPTURE( x, v, p )  ATOMIC_FETCH_ADD((x),(v),(p))
 #define ATOMIC_UPDATE( x )         ATOMIC_INCREMENT((x))
 
-#if defined(HAVE_SYCL)
-
+// #if defined(HAVE_SYCL)
+#if defined(NONE)
 static const cl::sycl::memory_order          order = cl::sycl::memory_order::relaxed;
 static const cl::sycl::access::address_space space = cl::sycl::access::address_space::global_space;
 
-
-/* template <typename T>
+/* camille
+ template <typename T>
 inline void ATOMIC_WRITE(T & x, T v) {
     //x = v;
 }
@@ -60,7 +60,24 @@ inline void ATOMIC_ADD(T& x, T v) {
     
 }*/
 
+/*
+template <>
+inline void ATOMIC_ADD(double& x, double v) {
+    static_assert(sizeof(double) == sizeof(uint64_t), "Unsafe: double is not 64-bits");
+    cl::sycl::atomic<uint64_t, space> t( (cl::sycl::multi_ptr<uint64_t, space>( reinterpret_cast<uint64_t*>(&x)) ));
+    uint64_t old_i = t.load(order);
+    double   old_d;
+    do {
+      old_d = *reinterpret_cast<const double*>(&old_i);
+      const double   new_d = old_d + v;
+      const uint64_t new_i = *reinterpret_cast<const uint64_t *>(&new_d);
+      if (t.compare_exchange_strong(old_i, new_i, order)) break;
+        
+    } while (true);
+    // p = old_d;
+} */
 
+//camille updated
 template <typename T>
 inline void ATOMIC_WRITE(T & x, T v) {
     //x = v;
@@ -85,22 +102,6 @@ inline void ATOMIC_ADD(T& x, T v) {
     
 }
 
-/*
-template <>
-inline void ATOMIC_ADD(double& x, double v) {
-    static_assert(sizeof(double) == sizeof(uint64_t), "Unsafe: double is not 64-bits");
-    cl::sycl::atomic<uint64_t, space> t( (cl::sycl::multi_ptr<uint64_t, space>( reinterpret_cast<uint64_t*>(&x)) ));
-    uint64_t old_i = t.load(order);
-    double   old_d;
-    do {
-      old_d = *reinterpret_cast<const double*>(&old_i);
-      const double   new_d = old_d + v;
-      const uint64_t new_i = *reinterpret_cast<const uint64_t *>(&new_d);
-      if (t.compare_exchange_strong(old_i, new_i, order)) break;
-        
-    } while (true);
-    // p = old_d;
-} */
 
 template <>
 inline void ATOMIC_ADD(double& x, double v) {
@@ -124,6 +125,8 @@ inline void ATOMIC_ADD(double& x, double v) {
     // p = old_d;
 }
 
+
+/* Gib
 template <typename T1, typename T2>
 inline void ATOMIC_ADD(T1& x, T2 v) {
     static_assert( sizeof(T1) >= sizeof(T2), "Unsafe: small += large");
@@ -157,7 +160,7 @@ inline void ATOMIC_FETCH_ADD(T1& x, T2 v, T3& p) {
     T1 val = static_cast<T2>(v);
     cl::sycl::atomic<T1, space> y( (cl::sycl::multi_ptr<T1, space>(&x)));
     p = cl::sycl::atomic_fetch_add(y, val, order);
-}
+} */
 
 #elif defined(HAVE_CUDA) && defined(__CUDA_ARCH__)
 
@@ -249,6 +252,12 @@ inline void ATOMIC_FETCH_ADD(T1& x, T2 v, T3& p) {
 }
 
 #else // SEQUENTIAL
+
+#if defined(HAVE_SYCL)
+static const cl::sycl::memory_order          order = cl::sycl::memory_order::relaxed;
+static const cl::sycl::access::address_space space = cl::sycl::access::address_space::global_space;
+
+#endif
 
 template <typename T>
 inline void ATOMIC_WRITE(T & x, T v) {
