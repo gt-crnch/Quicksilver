@@ -196,12 +196,12 @@ CXXFLAGS	+= -ferror-limit=3
 CXXFLAGS	+= -fsycl
 CXXFLAGS	+= -fsycl-unnamed-lambda
 
-#CXXFLAGS	+= -g # SPIR-V backend generates debug output when this is used
+CXXFLAGS	+= -g # SPIR-V backend generates debug output when this is used
 
 # -------------------------------------------------------
 # Intel oneAPI DPC++ compiler that supports Intel devices
 # -------------------------------------------------------
-CXX		 = dpcpp
+CXX		 = dpcpp -fintelfpga
 # NVIDIA back-end does not support printf yet...
 CPPFLAGS	+= -DHAVE_SYCL_PRINTF
 
@@ -212,6 +212,10 @@ CXXFLAGS	+= -fno-sycl-early-optimizations
 # https://software.intel.com/content/www/us/en/develop/documentation/oneapi-programming-guide/top/programming-interface/gpu-flow/offline-compilation-for-gpu.html
 #CXXFLAGS += -fsycl-targets=spir64_gen-unknown-linux-sycldevice
 #LDFLAGS  += -Xsycl-target-backend=spir64_gen-unknown-linux-sycldevice "-device skl"
+
+#FPGA mods
+# CXXFLAGS += -fsycl-targets=spir64_gen-unknown-linux-sycldevice
+# LDFLAGS  += -Xsycl-target-backend=spir64_gen-unknown-linux-sycldevice "-device skl"
 
 # -------------------------------------------------------
 # Intel DPC++ open-source compiler built for NVIDIA
