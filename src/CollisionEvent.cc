@@ -51,6 +51,8 @@ HOST_DEVICE SYCL_EXTERNAL
 bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle, unsigned int tally_index)
 {
    const MC_Cell_State &cell = monteCarlo->domain[mc_particle.domain].cell_state[mc_particle.cell];
+   // monteCarlo->domain[0].cell_state[0];
+   // monteCarlo->domain[mc_particle.domain].cell_state[mc_particle.cell];
 
    int globalMatIndex = cell._material;
 

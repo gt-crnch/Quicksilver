@@ -196,22 +196,29 @@ CXXFLAGS	+= -ferror-limit=3
 CXXFLAGS	+= -fsycl
 CXXFLAGS	+= -fsycl-unnamed-lambda
 
+CXXFLAGS	+= -fsycl-link
+CXXFLAGS	+= -Xshardware
 CXXFLAGS	+= -g # SPIR-V backend generates debug output when this is used
 
 # -------------------------------------------------------
 # Intel oneAPI DPC++ compiler that supports Intel devices
 # -------------------------------------------------------
-CXX		 = dpcpp -fintelfpga
+
+CXX		 = dpcpp -fintelfpga -Xsdont-error-if-large-area-est
 # NVIDIA back-end does not support printf yet...
-CPPFLAGS	+= -DHAVE_SYCL_PRINTF
+# CPPFLAGS	+= -DHAVE_SYCL_PRINTF
 
 # works around https://github.com/intel/llvm/issues/2629
 CXXFLAGS	+= -fno-sycl-early-optimizations
 
 # GPU offline compile
 # https://software.intel.com/content/www/us/en/develop/documentation/oneapi-programming-guide/top/programming-interface/gpu-flow/offline-compilation-for-gpu.html
-#CXXFLAGS += -fsycl-targets=spir64_gen-unknown-linux-sycldevice
-#LDFLAGS  += -Xsycl-target-backend=spir64_gen-unknown-linux-sycldevice "-device skl"
+# CXXFLAGS += -fsycl-targets=spir64_gen-unknown-linux-sycldevice
+# LDFLAGS  += -Xsycl-target-backend=spir64_gen-unknown-linux-sycldevice "-device skl"
+
+#FPGA mods
+# CXXFLAGS += -fsycl-targets=spir64_gen-unknown-linux-sycldevice
+# LDFLAGS  += -Xsycl-target-backend=spir64_gen-unknown-linux-sycldevice "-device skl"
 
 #FPGA mods
 # CXXFLAGS += -fsycl-targets=spir64_gen-unknown-linux-sycldevice
