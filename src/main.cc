@@ -283,6 +283,7 @@ void cycleTracking(MonteCarlo *monteCarlo)
                        {
                           const size_t N = numParticles;
                       #ifdef HAVE_SYCL
+			  //Use parallel for on CPU and GPU devices but use single task for FPGA
                           sycl_device_queue.submit([&](sycl::handler &h) {
                               h.parallel_for(sycl::range<1>{N},  [=](sycl::item<1> it) {
                                  int particle_index = it[0];

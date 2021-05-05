@@ -197,14 +197,13 @@ CXXFLAGS	+= -fsycl
 CXXFLAGS	+= -fsycl-unnamed-lambda
 
 CXXFLAGS	+= -fsycl-link
-CXXFLAGS	+= -Xshardware
 CXXFLAGS	+= -g # SPIR-V backend generates debug output when this is used
 
 # -------------------------------------------------------
 # Intel oneAPI DPC++ compiler that supports Intel devices
 # -------------------------------------------------------
 
-CXX		 = dpcpp -fintelfpga -Xsdont-error-if-large-area-est
+CXX		 = dpcpp
 # NVIDIA back-end does not support printf yet...
 # CPPFLAGS	+= -DHAVE_SYCL_PRINTF
 
@@ -217,13 +216,35 @@ CXXFLAGS	+= -fno-sycl-early-optimizations
 # LDFLAGS  += -Xsycl-target-backend=spir64_gen-unknown-linux-sycldevice "-device skl"
 
 #FPGA mods
-# CXXFLAGS += -fsycl-targets=spir64_gen-unknown-linux-sycldevice
-# LDFLAGS  += -Xsycl-target-backend=spir64_gen-unknown-linux-sycldevice "-device skl"
 
-#FPGA mods
-CXXFLAGS += -fsycl-link -Xshardware
-# CXXFLAGS += -fsycl-targets=spir64_gen-unknown-linux-sycldevice
-# LDFLAGS  += -Xsycl-target-backend=spir64_gen-unknown-linux-sycldevice "-device skl"
+# Set this flag to compile reports even if resources are exceeded
+CXXFLAGS += -Xsdont-error-if-large-area-est
+
+ifeq ($(FPGAEMU),1)
+  #Emulation only requires an unknown device flag
+  CXXFLAGS += -fsycl-targets=spir64_fpga-unknown-unknown-sycldevice
+else
+  #Emulation and all "non-CPU" runs require -fintelfpga flag
+  CXXFLAGS += -fintelfpga 
+endif
+
+# Static HTML Report
+#CXXFLAGS += -fsycl-link -Xshardware
+
+# VTune profiling with the hardware
+#CXXFLAGS += -Xshardware -Xsprofile
+
+# Bitstream hardware generation
+#CXXFLAGS += -Xshardware
+
+# Specify Arria 10 or Stratix 10 board
+# CXXFLAGS += -Xsboard=intel_a10gx_pac:pac_a10
+# For the PAC cards, you can explicitly
+# https://software.intel.com/content/www/us/en/develop/documentation/oneapi-programming-guide/top/programming-interface/fpga-flow/fpga-bsps-and-boards.html
+#CXXFLAGS += -Xsboard=intel_s10sx_pac:pac_s10
+
+#Explicitly use USM
+#CXXFLAGS += -Xsboard=intel_s10sx_pac:pac_s10_usm
 
 # -------------------------------------------------------
 # Intel DPC++ open-source compiler built for NVIDIA

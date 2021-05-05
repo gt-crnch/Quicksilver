@@ -1,0 +1,25 @@
+_Last Updated 2021-05-21_
+
+# Supplemental instructions for running with Intel FPGAs
+-------------------------------------------------------------------------------
+
+## Compilation
+The FPGA development process for OneAPI/DPCPP includes the following steps:
+1) Compile SYCL/DPCPP code for CPU and run on CPU
+2) Compile for FPGA emulation (generating SystemVerilog models for emulation)
+3) Generate a static HTML report to look at project performance and results for a specific FPGA
+3a) Retune code based on report and repeat steps 1-3
+
+4) Generate a bitstream to test initial execution
+5) Profile the bitstream with the hardware and with VTune
+6) Retune code based on the profiling output and regenerate a bitstream
+
+To compile for FPGA emulation:
+FPGAEMU=1 make
+  OR
+export FPGAEMU=1
+make
+
+### Time required (tested on a VM with OneAPI 2021.2 tools)
+CPU compilation: 
+Emulation compilation: ~35 minutes and 2 GB of DRAM
