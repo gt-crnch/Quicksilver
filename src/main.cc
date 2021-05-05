@@ -63,12 +63,16 @@ int main(int argc, char** argv)
        sycl_device_queue = cl::sycl::host_selector{};
    }
    else
-   if (devname == "FPGA") {
+   if (devname == "FPGA_EMU") {
        sycl_device_queue = cl::sycl::INTEL::fpga_emulator_selector{};
+   }
+   else 
+   if (devname == "FPGA") {
+       sycl_device_queue = cl::sycl::INTEL::fpga_selector{};
    }
    else
    {
-       std::cout << "QS_DEVICE must be CPU, GPU, FPGA or HOST" << std::endl;
+       std::cout << "QS_DEVICE must be CPU, GPU, FPGA_EMU, FPGA or HOST" << std::endl;
        std::abort();
    }
 

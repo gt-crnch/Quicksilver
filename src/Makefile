@@ -221,6 +221,7 @@ CXXFLAGS	+= -fno-sycl-early-optimizations
 # LDFLAGS  += -Xsycl-target-backend=spir64_gen-unknown-linux-sycldevice "-device skl"
 
 #FPGA mods
+CXXFLAGS += -fsycl-link -Xshardware
 # CXXFLAGS += -fsycl-targets=spir64_gen-unknown-linux-sycldevice
 # LDFLAGS  += -Xsycl-target-backend=spir64_gen-unknown-linux-sycldevice "-device skl"
 
